@@ -15,7 +15,7 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 bot.use(
   new LocalSession({
     database: path.resolve(__dirname, '../data/storage.json'),
-  }).middleware(),
+  }).middleware()
 );
 
 async function translate(input, from, to) {
@@ -76,13 +76,21 @@ async function learn(ctx) {
       _.shuffle([
         ...wrong.map(({ from }) => [Markup.button.callback(from, 'false')]),
         [Markup.button.callback(from, 'true')],
-      ]),
-    ),
+      ])
+    )
   );
 }
 
 bot.command('learn', async (ctx) => {
   await learn(ctx);
+});
+
+bot.command('list', async (ctx) => {
+  const words = ctx.session.words || [];
+  await ctx.reply(
+    `Recently added words\n` +
+      words.map(({ from, to }) => `${from} ↔ ${to}`).join('\n')
+  );
 });
 
 bot.on('message', async (ctx) => {
@@ -100,7 +108,7 @@ bot.on('message', async (ctx) => {
   const translation = await translate(
     text,
     isEnglish ? 'eng' : 'rus',
-    isEnglish ? 'rus' : 'eng',
+    isEnglish ? 'rus' : 'eng'
   );
 
   console.log(translation.contextResults);
@@ -129,7 +137,7 @@ bot.on('message', async (ctx) => {
     [reqId]: {
       term: text,
       variants: Object.fromEntries(
-        variants.map((v, i) => [`${reqId}:${i}`, `${v}`]),
+        variants.map((v, i) => [`${reqId}:${i}`, `${v}`])
       ),
     },
   });
@@ -143,7 +151,7 @@ bot.on('message', async (ctx) => {
         const target = targetExamples[i];
 
         return `– ${exampleHtml(source)}\n– ${exampleHtml(target)}`;
-      }),
+      })
     )
     .slice(0, 4);
 
@@ -165,7 +173,7 @@ bot.on('callback_query', async (ctx) => {
     ctx.editMessageText(
       `${JSON.parse(ctx.callbackQuery.data) ? '👍' : '👎'} ${
         ctx.callbackQuery.message.text
-      } ↔ ${correct.text}`,
+      } ↔ ${correct.text}`
     );
 
     return learn(ctx);
@@ -198,6 +206,10 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
     {
       command: 'learn',
       description: 'learn one of recently added words',
+    },
+    {
+      command: 'list',
+      description: 'list recently added words',
     },
   ]);
 
