@@ -1,0 +1,7 @@
+services:
+  bot:
+    build: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TELEGRAM_BOT_TOKEN

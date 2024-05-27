@@ -111,8 +111,6 @@ bot.on('message', async (ctx) => {
     isEnglish ? 'rus' : 'eng'
   );
 
-  console.log(translation.contextResults);
-
   const translations = _(translation.contextResults.results)
     .map((r) => r.translation)
     .uniq()
@@ -214,4 +212,6 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
   ]);
 
   await bot.launch();
+
+  logger.info('Bot started');
 })();
